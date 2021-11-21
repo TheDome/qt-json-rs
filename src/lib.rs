@@ -351,7 +351,7 @@ impl QJSONDocument {
      * This class is capable of reading a string in UTF16 and UTF8
      */
     fn read_string(reader: &mut dyn Read, latin: bool) -> Result<String, Error> {
-        let key_len = reader.read_u16::<Endianess>()? ;
+        let key_len = reader.read_u16::<Endianess>()?;
 
         trace!(" --> Reading string, latin:{}, len:{}", latin, key_len);
         // A latin string defined an ASCII encoded string array. So every character is 8 bits long.
@@ -368,8 +368,8 @@ impl QJSONDocument {
             for _ in 0..key_len {
                 buffer.push(reader.read_u16::<Endianess>()?);
             }
-            String::from_utf16(buffer.as_slice()).map_err(|_| Error::new(ErrorKind::InvalidData, "Invalid \
-            UTF16"))
+            String::from_utf16(buffer.as_slice())
+                .map_err(|_| Error::new(ErrorKind::InvalidData, "Invalid UTF16"))
         }
     }
 }
