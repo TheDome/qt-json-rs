@@ -85,6 +85,7 @@ jobs:
           diff README.md README.created.md > README.diff
           if [ -s README.diff ]; then
             echo "README.md is not up to date"
+            cat README.diff
             exit 1
           fi
   build:
