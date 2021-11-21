@@ -12,7 +12,6 @@
 //! ```rust
 //! use qt_json_rs::QJSONDocument;
 //!
-//! fn main() {
 //!         let json_data = b"qbjs\
 //!     \x01\x00\x00\x00\
 //!     \x10\x00\x00\x00\
@@ -23,7 +22,6 @@
 //!     let document = QJSONDocument::from_binary(json_data.to_vec()).unwrap();
 //!
 //!     println!("{:?}", document);
-//! }
 //! ```
 //!
 //! # Disclaimer
@@ -158,17 +156,12 @@ impl QJSONDocument {
     /**
      * loads an object from the stream
      */
-    fn load_object(
-        data: &Vec<u8>,
-        offsets: &[u8],
-        len: u32,
-        size: u32,
-    ) -> Result<JsonValue, Error> {
+    fn load_object(data: &[u8], offsets: &[u8], len: u32, size: u32) -> Result<JsonValue, Error> {
         debug!("Loading object ..");
         trace!("Expected len: {}", len);
         trace!("Actual len: {}", offsets.len() / 4);
 
-        if !(offsets.len() / 4 >= (len as usize)) {
+        if offsets.len() / 4 < (len as usize) {
             return Err(Error::new(
                 ErrorKind::InvalidData,
                 format!(
@@ -235,12 +228,12 @@ impl QJSONDocument {
         Ok(JsonValue::Object(object))
     }
 
-    fn load_array(data: &Vec<u8>, offsets: &[u8], len: u32, size: u32) -> Result<JsonValue, Error> {
+    fn load_array(data: &[u8], offsets: &[u8], len: u32, size: u32) -> Result<JsonValue, Error> {
         debug!("Loading array ..");
         trace!("Expected len: {}", len);
         trace!("Actual len: {}", offsets.len() / 4);
 
-        if !(offsets.len() / 4 >= (len as usize)) {
+        if offsets.len() / 4 < (len as usize) {
             return Err(Error::new(
                 ErrorKind::InvalidData,
                 format!(
