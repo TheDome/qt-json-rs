@@ -31,9 +31,9 @@
 //!
 //! # Disclaimer
 //!
-//! This library has been widely created by looking at the Qt source code and performing reverse
+//! This library has been created by looking at the Qt source code and performing reverse
 //! engineering.
-//! There is a possibility that the code will not work with other Version of QT JSON documents.
+//! There is a possibility that the code will not work with other Version of Qt JSON documents.
 //! Any help with this library is welcome.
 
 extern crate log;
