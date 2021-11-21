@@ -86,9 +86,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions-rs/cargo@v1
         with:
-          command: readme > READEME.created.md
+          command: readme
+          args: "> README.created.md"
       - run: >
-          diff README.md READEME.created.md > README.diff
+          diff README.md README.created.md > README.diff
           if [ -s README.diff ]; then
             echo "README.md is not up to date"
             exit 1
