@@ -87,7 +87,10 @@ jobs:
           crate: grcov
           use-tool-cache: true
       - uses: actions-rs/grcov@v0.1
+        id: coverage
       - uses: codecov/codecov-action@v2
+        with:
+          files: ${{ steps.coverage.outputs.report }}
   readme-lint:
     runs-on: ubuntu-latest
     needs:
