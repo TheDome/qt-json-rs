@@ -1,7 +1,7 @@
 //!
 //! [![codecov](https://codecov.io/gh/TheDome/qt-json-rs/branch/develop/graph/badge.svg?token=7MIOMJ88B1)](https://codecov.io/gh/TheDome/qt-json-rs)
 //!
-//! A simple parser for the Internal QT Binary JSON data format.
+//! A simple parser for the Internal Qt Binary JSON data format.
 //!
 //! This parser will transform the popular
 //! [QTBinary JSON](https://doc.qt.io/qt-6.2/qbinaryjson.html#toBinaryData)
@@ -9,7 +9,7 @@
 //!
 //! # Use
 //!
-//! Simply provida a binary encoded JSON Array to the function and it will parse it into an
+//! Simply provide a binary encoded JSON Array to the function and it will parse it into an
 //! internal JSON structure:
 //!
 //! ```rust
@@ -31,7 +31,7 @@
 //!
 //! # Disclaimer
 //!
-//! This library has been widely created by looking at the QT source code and performing reverse
+//! This library has been widely created by looking at the Qt source code and performing reverse
 //! engineering.
 //! There is a possibility that the code will not work with other Version of QT JSON documents.
 //! Any help with this library is welcome.
