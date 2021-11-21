@@ -1,0 +1,166 @@
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+
+
+name: Test, Check and Release
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-audit
+          version: latest
+          use-tool-cache: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: audit
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Install gtk-dev
+        run: sudo apt-get install build-essential libgtk-3-dev
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+  test:
+    runs-on: ubuntu-latest
+    needs:
+      - check
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Install gtk-dev
+        run: sudo apt-get install build-essential libgtk-3-dev
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+  readme-lint:
+    runs-on: ubuntu-latest
+    needs:
+      - check
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions-rs/install@v0.1
+        with:
+          crate: readme
+          version: 3.2.0
+          use-tool-cache: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: readme > READEME.created.md
+      - run: >
+          diff README.md READEME.created.md > README.diff
+          if [ -s README.diff ]; then
+            echo "README.md is not up to date"
+            exit 1
+          fi
+  build:
+    runs-on: ubuntu-latest
+    needs:
+      - check
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Install gtk-dev
+        run: sudo apt-get install build-essential libgtk-3-dev
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --verbose
+      - uses: actions/upload-artifact@v2
+        with:
+          name: linux-binary
+          path: target/debug/ReView
+  semantic-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - build
+      - test
+      - readme-lint
+    steps:
+      - uses: actions/checkout@v2.4.0
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v2.4.1
+        with:
+          node-version: "16"
+      - shell: bash
+        run: |
+          sudo npm install -g \
+            semantic-release@18.0.0 \
+            @semantic-release/git@10.0.0 \
+            @semantic-release/release-notes-generator@10.0.2 \
+            @semantic-release/github@8.0.0
+      - shell: bash
+        run: |
+          semantic-release \
+            --branches main \
+            --plugins "@semantic-release/commit-analyzer,@semantic-release/release-notes-generator,@semantic-release/git,@semantic-release/github" \
+            --tag-format \${version} \
+            --debug true
+        env:
+          GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+  auto-merge:
+    needs:
+      - semantic-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: fastify/github-action-merge-dependabot@v2.6.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
