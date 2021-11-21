@@ -1,4 +1,3 @@
-
 extern crate env_logger;
 
 use qt_json_rs::QJSONDocument;

@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-
-
 /// A JSON Value is the Enum containing a Value. This makes it easy to perform match operations
 /// against it.
 #[derive(Debug)]

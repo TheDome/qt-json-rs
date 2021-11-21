@@ -33,7 +33,6 @@
 //! There is a possibility that the code will not work with other Version of QT JSON documents.
 //! Any help with this library is welcome.
 
-
 extern crate log;
 #[macro_use]
 extern crate num_derive;
@@ -49,7 +48,6 @@ use num_traits::FromPrimitive;
 use elements::{JsonBaseValue, JsonValue, Object};
 
 pub mod elements;
-
 
 /// A QJSONDocument is the root of every parsed JSOn Document.
 /// It consists out of metadata and a base
@@ -83,7 +81,6 @@ enum QTValueType {
     /// An explicitly undefined value
     Undefined = 0x80,
 }
-
 
 const QT_JSON_TAG: u32 =
     (('s' as u32) << 24) | (('j' as u32) << 16) | (('b' as u32) << 8) | ('q' as u32);
@@ -174,8 +171,11 @@ impl QJSONDocument {
         if !(offsets.len() / 4 >= (len as usize)) {
             return Err(Error::new(
                 ErrorKind::InvalidData,
-                format!("The object is not the expected size, expected: {}, provided: {}", len,
-                        offsets.len() / 4),
+                format!(
+                    "The object is not the expected size, expected: {}, provided: {}",
+                    len,
+                    offsets.len() / 4
+                ),
             ));
         }
 
@@ -243,8 +243,11 @@ impl QJSONDocument {
         if !(offsets.len() / 4 >= (len as usize)) {
             return Err(Error::new(
                 ErrorKind::InvalidData,
-                format!("The array is not the expected size, expected: {}, provided: {}", len,
-                        offsets.len() / 4),
+                format!(
+                    "The array is not the expected size, expected: {}, provided: {}",
+                    len,
+                    offsets.len() / 4
+                ),
             ));
         }
 
@@ -375,7 +378,3 @@ impl QJSONDocument {
         }
     }
 }
-
-
-
-
