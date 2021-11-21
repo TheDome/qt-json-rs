@@ -105,7 +105,6 @@ impl QJSONDocument {
         assert_eq!(version, 1);
 
         debug!("QBJS Version: {}", version);
-        println!("{:x?}", data);
 
         let elem = Self::load_element(data[8..].to_vec())?;
 
@@ -352,10 +351,7 @@ impl QJSONDocument {
      * This class is capable of reading a string in UTF16 and UTF8
      */
     fn read_string(reader: &mut dyn Read, latin: bool) -> Result<String, Error> {
-        let key_len = match latin {
-            true => reader.read_u16::<Endianess>()? as u32,
-            false => reader.read_u32::<Endianess>()?,
-        };
+        let key_len = reader.read_u16::<Endianess>()?;
 
         trace!(" --> Reading string, latin:{}, len:{}", latin, key_len);
         // A latin string defined an ASCII encoded string array. So every character is 8 bits long.
@@ -370,9 +366,10 @@ impl QJSONDocument {
             // By definition any string in JavaScript is UTF16 encoded else.
             let mut buffer = Vec::new();
             for _ in 0..key_len {
-                buffer.push((reader.read_u8()? as u16) << 8 | reader.read_u8()? as u16);
+                buffer.push(reader.read_u16::<Endianess>()?);
             }
-            Ok(String::from_utf16_lossy(buffer.as_slice()))
+            String::from_utf16(buffer.as_slice())
+                .map_err(|_| Error::new(ErrorKind::InvalidData, "Invalid UTF16"))
         }
     }
 }
@@ -402,5 +399,94 @@ mod test {
             JsonValue::String(ref s) => assert_eq!(s, "yes"),
             _ => panic!("Expected string"),
         }
+    }
+
+    #[test]
+    fn test_non_latin_number() {
+        let data = b"qbjs\x01\x00\x00\x00\x18\x00\x00\x00\x02\x00\x00\x00\x14\x00\x00\x00\
+        \x33\x33\x33\x33\x33\x33\x24\x40\x82\x01\x00\x00";
+
+        let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
+
+        match parsed.base {
+            JsonBaseValue::Array(ref vals) => {
+                assert_eq!(vals.len(), 1);
+                let num = &vals[0];
+                match num {
+                    JsonValue::Number(n) => assert_eq!(*n, 10.1),
+                    _ => panic!("Expected number"),
+                }
+            }
+            _ => panic!("Expected array"),
+        };
+    }
+
+    #[test]
+    fn test_latin_string() {
+        env_logger::init();
+        let data = b"qbjs\x01\x00\x00\x00\x14\x00\x00\x00\x02\x00\x00\x00\x10\x00\x00\x00\x01\x00\xF6\x00\x8B\x01\x00\x00";
+
+        let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
+
+        match parsed.base {
+            JsonBaseValue::Array(ref vals) => {
+                assert_eq!(vals.len(), 1);
+                let num = &vals[0];
+                match num {
+                    JsonValue::String(n) => assert_eq!(*n, "ö"),
+                    _ => panic!("Expected string"),
+                }
+            }
+            _ => panic!("Expected array"),
+        };
+    }
+
+    #[test]
+    fn test_bool() {
+        let data = b"qbjs\x01\x00\x00\x00\x10\x00\x00\x00\x02\x00\x00\x00\x0C\x00\x00\x00!\x00\x00
+        \x00";
+
+        let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
+
+        match parsed.base {
+            JsonBaseValue::Array(ref vals) => {
+                assert_eq!(vals.len(), 1);
+                let num = &vals[0];
+                match num {
+                    JsonValue::Bool(n) => assert_eq!(*n, true),
+                    _ => panic!("Expected string"),
+                }
+            }
+            _ => panic!("Expected array"),
+        };
+    }
+
+    #[test]
+    fn test_nested_object() {
+        let data = b"qbjs\x01\x00\x00\x00\x34\x00\x00\x00\x02\x00\x00\x00\x30\x00\x00\x00\x24\x00\
+                \x00\x00\x03\x00\x00\x00\x20\x00\x00\x00\x1B\x03\x00\x00\x04\x00test\x00\x00\x03\
+                \x00yes\x00\x00\x00\x0C\x00\x00\x00\x85\x01\x00\x00";
+
+        let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
+
+        match parsed.base {
+            JsonBaseValue::Array(ref vals) => {
+                assert_eq!(vals.len(), 1);
+                let num = &vals[0];
+                let val = match num {
+                    JsonValue::Object(n) => {
+                        assert_eq!(n.size, 1);
+                        n.values.get("test").unwrap()
+                    }
+                    _ => panic!("Expected string"),
+                };
+
+                match val {
+                    JsonValue::String(n) => assert_eq!(*n, "yes"),
+                    _ => panic!("Expected string"),
+                }
+            }
+            _ => panic!("Expected array"),
+        };
     }
 }
