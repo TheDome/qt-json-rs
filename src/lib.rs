@@ -376,3 +376,36 @@ impl QJSONDocument {
         }
     }
 }
+
+
+#[cfg(test)]
+mod test {
+    use crate::elements::{JsonBaseValue, JsonValue};
+    use crate::QJSONDocument;
+
+    #[test]
+    fn read_object(){
+
+        let object_str = b"qbjs\x01\x00\x00\x00$\x00\x00\x00\x03\x00\x00\x00 \
+        \x00\x00\x00\x1B\x03\x00\x00\x04\x00test\x00\x00\x03\x00yes\x00\x00\x00\x0C\x00\x00\x00";
+
+        let parsed = QJSONDocument::from_binary(object_str.to_vec()).unwrap();
+
+        let val = match parsed.base {
+            JsonBaseValue::Object(ref object) => {
+                assert_eq!(object.size, 1);
+
+
+                object.values.get("test").unwrap()
+            }
+            _ => panic!("Expected object")
+        };
+
+        match val {
+            JsonValue::String(ref s) => assert_eq!(s, "yes"),
+            _ => panic!("Expected string")
+        }
+    }
+
+
+}
