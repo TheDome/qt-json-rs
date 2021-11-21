@@ -1,5 +1,8 @@
 # qt-json-rs
 
+
+[![codecov](https://codecov.io/gh/TheDome/qt-json-rs/branch/develop/graph/badge.svg?token=UEOUE3V3RM)](https://codecov.io/gh/TheDome/qt-json-rs)
+
 A simple parser for the Internal QT Binary JSON data format.
 
 This parser will transform the popular
