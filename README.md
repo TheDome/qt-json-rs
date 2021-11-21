@@ -14,7 +14,7 @@ internal JSON structure:
 ```rust
 use qt_json_rs::QJSONDocument;
 
-fn main() {
+fn main(){
         let json_data = b"qbjs\
     \x01\x00\x00\x00\
     \x10\x00\x00\x00\

@@ -12,6 +12,7 @@
 //! ```rust
 //! use qt_json_rs::QJSONDocument;
 //!
+//! fn main(){
 //!         let json_data = b"qbjs\
 //!     \x01\x00\x00\x00\
 //!     \x10\x00\x00\x00\
@@ -22,6 +23,7 @@
 //!     let document = QJSONDocument::from_binary(json_data.to_vec()).unwrap();
 //!
 //!     println!("{:?}", document);
+//! }
 //! ```
 //!
 //! # Disclaimer
