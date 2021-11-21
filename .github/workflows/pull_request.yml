@@ -81,7 +81,7 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - run: cargo readme> README.created.md
-      - run: >
+      - run: |
           diff README.md README.created.md > README.diff
           if [ -s README.diff ]; then
             echo "README.md is not up to date"
