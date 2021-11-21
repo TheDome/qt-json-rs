@@ -6,7 +6,7 @@ categories = ["data-structures"]
 author = "Dominic Heun <dominic.heun@gmx.net>"
 license-file = "LICENSE"
 description = "JSON library for QT"
-repository = "https://github.com/thedomen/qt-json-rs"
+repository = "https://github.com/thedome/qt-json-rs"
 homepage = "https://github.com/thedome/qt-json-rs"
 exclude = [".idea",".github"]
 
