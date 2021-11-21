@@ -422,4 +422,72 @@ mod test {
             _ => panic!("Expected array"),
         };
     }
+
+    #[test]
+    fn test_latin_string() {
+        let data = b"qbjs\x01\x00\x00\x00\x14\x00\x00\x00\x02\x00\x00\x00\x10\x00\x00\x00\x01\x00\xF6\x00\x8B\x01\x00\x00";
+
+        let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
+
+        match parsed.base {
+            JsonBaseValue::Array(ref vals) => {
+                assert_eq!(vals.len(), 1);
+                let num = &vals[0];
+                match num {
+                    JsonValue::String(n) => assert_eq!(*n, "ö"),
+                    _ => panic!("Expected string"),
+                }
+            }
+            _ => panic!("Expected array"),
+        };
+    }
+
+    #[test]
+    fn test_bool() {
+        let data = b"qbjs\x01\x00\x00\x00\x10\x00\x00\x00\x02\x00\x00\x00\x0C\x00\x00\x00!\x00\x00
+        \x00";
+
+        let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
+
+        match parsed.base {
+            JsonBaseValue::Array(ref vals) => {
+                assert_eq!(vals.len(), 1);
+                let num = &vals[0];
+                match num {
+                    JsonValue::Bool(n) => assert_eq!(*n, true),
+                    _ => panic!("Expected string"),
+                }
+            }
+            _ => panic!("Expected array"),
+        };
+    }
+
+    #[test]
+    fn test_nested_object() {
+        let data = b"qbjs\x01\x00\x00\x00\x34\x00\x00\x00\x02\x00\x00\x00\x30\x00\x00\x00\x24\x00\
+                \x00\x00\x03\x00\x00\x00\x20\x00\x00\x00\x1B\x03\x00\x00\x04\x00test\x00\x00\x03\
+                \x00yes\x00\x00\x00\x0C\x00\x00\x00\x85\x01\x00\x00";
+
+        let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
+
+        match parsed.base {
+            JsonBaseValue::Array(ref vals) => {
+                assert_eq!(vals.len(), 1);
+                let num = &vals[0];
+                let val = match num {
+                    JsonValue::Object(n) => {
+                        assert_eq!(n.size, 1);
+                        n.values.get("test").unwrap()
+                    }
+                    _ => panic!("Expected string"),
+                };
+
+                match val {
+                    JsonValue::String(n) => assert_eq!(*n, "yes"),
+                    _ => panic!("Expected string"),
+                }
+            }
+            _ => panic!("Expected array"),
+        };
+    }
 }
