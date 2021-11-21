@@ -84,19 +84,11 @@ enum QTValueType {
     Undefined = 0x80,
 }
 
-#[cfg(not(feature = "QJsonBigEndian"))]
+
 const QT_JSON_TAG: u32 =
     (('s' as u32) << 24) | (('j' as u32) << 16) | (('b' as u32) << 8) | ('q' as u32);
-#[cfg(feature = "QJsonBigEndian")]
-const QT_JSON_TAG: u32 =
-    (('q' as u32) << 24) | (('b' as u32) << 16) | (('j' as u32) << 8) | ('s' as u32);
 
-/// Defined if the current document should be interpreted in big endian format. Default is Litte
-/// Endian
-#[cfg(not(feature = "QJsonBigEndian"))]
 pub type Endianess = byteorder::LittleEndian;
-#[cfg(feature = "QJsonBigEndian")]
-pub type Endianess = byteorder::BigEndian;
 
 impl QJSONDocument {
     /// Parses a binary VEC into a QJSONDocument
@@ -184,7 +176,7 @@ impl QJSONDocument {
                 ErrorKind::InvalidData,
                 format!("The object is not the expected size, expected: {}, provided: {}", len,
                         offsets.len() / 4),
-            ))
+            ));
         }
 
         let mut offsets = Cursor::new(offsets);
@@ -253,7 +245,7 @@ impl QJSONDocument {
                 ErrorKind::InvalidData,
                 format!("The array is not the expected size, expected: {}, provided: {}", len,
                         offsets.len() / 4),
-            ))
+            ));
         }
 
         let mut offsets = Cursor::new(offsets);
