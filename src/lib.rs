@@ -404,15 +404,13 @@ mod test {
     }
 
     #[test]
-    fn test_non_latin_number(){
-
+    fn test_non_latin_number() {
         let data = b"qbjs\x01\x00\x00\x00\x18\x00\x00\x00\x02\x00\x00\x00\x14\x00\x00\x00\
         \x33\x33\x33\x33\x33\x33\x24\x40\x82\x01\x00\x00";
 
-
         let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
 
-         match parsed.base {
+        match parsed.base {
             JsonBaseValue::Array(ref vals) => {
                 assert_eq!(vals.len(), 1);
                 let num = &vals[0];
