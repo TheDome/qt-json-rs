@@ -105,7 +105,6 @@ impl QJSONDocument {
         assert_eq!(version, 1);
 
         debug!("QBJS Version: {}", version);
-        println!("{:x?}", data);
 
         let elem = Self::load_element(data[8..].to_vec())?;
 
@@ -402,5 +401,27 @@ mod test {
             JsonValue::String(ref s) => assert_eq!(s, "yes"),
             _ => panic!("Expected string"),
         }
+    }
+
+    #[test]
+    fn test_non_latin_number(){
+
+        let data = b"qbjs\x01\x00\x00\x00\x18\x00\x00\x00\x02\x00\x00\x00\x14\x00\x00\x00\
+        \x33\x33\x33\x33\x33\x33\x24\x40\x82\x01\x00\x00";
+
+
+        let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
+
+         match parsed.base {
+            JsonBaseValue::Array(ref vals) => {
+                assert_eq!(vals.len(), 1);
+                let num = &vals[0];
+                match num {
+                    JsonValue::Number(n) => assert_eq!(*n, 10.1),
+                    _ => panic!("Expected number"),
+                }
+            }
+            _ => panic!("Expected array"),
+        };
     }
 }
