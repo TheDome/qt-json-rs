@@ -351,10 +351,7 @@ impl QJSONDocument {
      * This class is capable of reading a string in UTF16 and UTF8
      */
     fn read_string(reader: &mut dyn Read, latin: bool) -> Result<String, Error> {
-        let key_len = match latin {
-            true => reader.read_u16::<Endianess>()? as u32,
-            false => reader.read_u32::<Endianess>()?,
-        };
+        let key_len = reader.read_u16::<Endianess>()? ;
 
         trace!(" --> Reading string, latin:{}, len:{}", latin, key_len);
         // A latin string defined an ASCII encoded string array. So every character is 8 bits long.
@@ -369,9 +366,10 @@ impl QJSONDocument {
             // By definition any string in JavaScript is UTF16 encoded else.
             let mut buffer = Vec::new();
             for _ in 0..key_len {
-                buffer.push((reader.read_u8()? as u16) << 8 | reader.read_u8()? as u16);
+                buffer.push(reader.read_u16::<Endianess>()?);
             }
-            Ok(String::from_utf16_lossy(buffer.as_slice()))
+            String::from_utf16(buffer.as_slice()).map_err(|_| Error::new(ErrorKind::InvalidData, "Invalid \
+            UTF16"))
         }
     }
 }
@@ -425,6 +423,7 @@ mod test {
 
     #[test]
     fn test_latin_string() {
+        env_logger::init();
         let data = b"qbjs\x01\x00\x00\x00\x14\x00\x00\x00\x02\x00\x00\x00\x10\x00\x00\x00\x01\x00\xF6\x00\x8B\x01\x00\x00";
 
         let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
