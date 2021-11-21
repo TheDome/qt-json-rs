@@ -1,6 +1,10 @@
 # qt-json-rs
 
+## QT JSON
+
 A simple parser for the Internal QT Binary JSON data format.
+
+[![codecov](https://codecov.io/gh/TheDome/qt-json-rs/branch/develop/graph/badge.svg?token=UEOUE3V3RM)](https://codecov.io/gh/TheDome/qt-json-rs)
 
 This parser will transform the popular
 [QTBinary JSON](https://doc.qt.io/qt-6.2/qbinaryjson.html#toBinaryData)
