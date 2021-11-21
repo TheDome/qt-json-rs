@@ -135,10 +135,6 @@ jobs:
         with:
           command: build
           args: --verbose
-      - uses: actions/upload-artifact@v2
-        with:
-          name: linux-binary
-          path: target/debug/ReView
   publish:
     runs-on: ubuntu-latest
     needs:
