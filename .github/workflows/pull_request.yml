@@ -1,0 +1,203 @@
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+
+
+name: Test, Check and Release
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - name: Security audit
+        uses: actions-rs/audit-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
+  test:
+    runs-on: ubuntu-latest
+    needs:
+      - check
+      - format
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-nightly-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features --no-fail-fast
+        env:
+          CARGO_INCREMENTAL: '0'
+          RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
+          RUSTDOCFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
+      - uses: actions-rs/install@v0.1
+        with:
+          crate: grcov
+          use-tool-cache: true
+      - uses: actions-rs/grcov@v0.1
+      - uses: codecov/codecov-action@v2
+  readme-lint:
+    runs-on: ubuntu-latest
+    needs:
+      - check
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-readme
+          version: 3.2.0
+          use-tool-cache: true
+      - run: cargo readme> README.created.md
+      - run: |
+          diff README.md README.created.md > README.diff
+          if [ -s README.diff ]; then
+            echo "README.md is not up to date"
+            cat README.diff
+            exit 1
+          fi
+  build:
+    runs-on: ubuntu-latest
+    needs:
+      - check
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --verbose
+  publish:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: publish
+          args: --dry-run
+  semantic-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - build
+      - test
+      - readme-lint
+      - publish
+    steps:
+      - uses: actions/checkout@v2.4.0
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v2.4.1
+        with:
+          node-version: "16"
+      - shell: bash
+        run: |
+          sudo npm install -g \
+            semantic-release@18.0.0 \
+            @semantic-release/git@10.0.0 \
+            @semantic-release/release-notes-generator@10.0.2 \
+            @semantic-release/github@8.0.0
+      - shell: bash
+        run: |
+          semantic-release \
+            --branches main \
+            --plugins "@semantic-release/commit-analyzer,@semantic-release/release-notes-generator,@semantic-release/git,@semantic-release/github" \
+            --tag-format \${version} \
+            --debug true
+        env:
+          GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+  auto-merge:
+    needs:
+      - semantic-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: fastify/github-action-merge-dependabot@v2.6.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
