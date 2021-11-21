@@ -26,7 +26,7 @@
 //! }
 //! ```
 //!
-//! # Disclaimer 1
+//! # Disclaimer
 //!
 //! This library has been widely created by looking at the QT source code and performing reverse
 //! engineering.

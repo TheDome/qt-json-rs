@@ -34,5 +34,3 @@ This library has been widely created by looking at the QT source code and perfor
 engineering.
 There is a possibility that the code will not work with other Version of QT JSON documents.
 Any help with this library is welcome.
-
-License: BSD
