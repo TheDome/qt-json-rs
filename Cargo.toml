@@ -2,7 +2,7 @@
 name = "qt-json-rs"
 version = "0.0.0"
 edition = "2021"
-categories = ["json", "qt"]
+categories = ["data-structures"]
 author = "Dominic Heun <dominic.heun@gmx.net>"
 license-file = "LICENSE"
 description = "JSON library for QT"
