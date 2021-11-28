@@ -1,9 +1,6 @@
-extern crate env_logger;
-
 use qt_json::QJSONDocument;
 
 fn main() {
-    env_logger::init();
     let json_data = b"qbjs\
     \x01\x00\x00\x00\
     \x10\x00\x00\x00\
