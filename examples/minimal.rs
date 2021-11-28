@@ -1,6 +1,6 @@
 extern crate env_logger;
 
-use qt_json_rs::QJSONDocument;
+use qt_json::QJSONDocument;
 
 fn main() {
     env_logger::init();

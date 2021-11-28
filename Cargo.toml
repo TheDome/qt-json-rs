@@ -1,10 +1,10 @@
 [package]
-name = "qt-json-rs"
+name = "qt-json"
 version = "0.0.0"
 edition = "2021"
 categories = ["data-structures"]
 author = "Dominic Heun <dominic.heun@gmx.net>"
-license-file = "LICENSE"
+license = "BSD"
 description = "JSON library for QT"
 repository = "https://github.com/thedome/qt-json-rs"
 homepage = "https://github.com/thedome/qt-json-rs"
