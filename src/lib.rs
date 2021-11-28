@@ -37,16 +37,12 @@
 //! There is a possibility that the code will not work with other Version of Qt JSON documents.
 //! Any help with this library is welcome.
 
-extern crate log;
-#[macro_use]
-extern crate num_derive;
-extern crate num_traits;
-
 use std::collections::HashMap;
 use std::io::{Cursor, Error, ErrorKind, Read};
 
 use byteorder::ReadBytesExt;
 use log::{debug, trace, warn};
+use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
 use elements::{JsonBaseValue, JsonValue, Object};
@@ -424,7 +420,6 @@ mod test {
 
     #[test]
     fn test_latin_string() {
-        env_logger::init();
         let data = b"qbjs\x01\x00\x00\x00\x14\x00\x00\x00\x02\x00\x00\x00\x10\x00\x00\x00\x01\x00\xF6\x00\x8B\x01\x00\x00";
 
         let parsed = QJSONDocument::from_binary(data.to_vec()).unwrap();
