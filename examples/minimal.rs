@@ -1,5 +1,3 @@
-
-
 use qt_json::QJSONDocument;
 
 fn main() {

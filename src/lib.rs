@@ -37,7 +37,6 @@
 //! There is a possibility that the code will not work with other Version of Qt JSON documents.
 //! Any help with this library is welcome.
 
-
 use std::collections::HashMap;
 use std::io::{Cursor, Error, ErrorKind, Read};
 
