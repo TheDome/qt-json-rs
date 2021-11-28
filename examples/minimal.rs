@@ -1,6 +1,6 @@
 
 
-use qt_json_rs::QJSONDocument;
+use qt_json::QJSONDocument;
 
 fn main() {
     let json_data = b"qbjs\

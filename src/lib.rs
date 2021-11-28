@@ -1,5 +1,6 @@
 //!
 //! [![codecov](https://codecov.io/gh/TheDome/qt-json-rs/branch/develop/graph/badge.svg?token=7MIOMJ88B1)](https://codecov.io/gh/TheDome/qt-json-rs)
+//! ![crates.io](https://img.shields.io/crates/v/qt-json.svg)
 //!
 //! A simple parser for the Internal Qt Binary JSON data format.
 //!
@@ -13,7 +14,7 @@
 //! internal JSON structure:
 //!
 //! ```rust
-//! use qt_json_rs::QJSONDocument;
+//! use qt_json::QJSONDocument;
 //!
 //! fn main(){
 //!         let json_data = b"qbjs\
