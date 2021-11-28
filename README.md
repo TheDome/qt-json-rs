@@ -1,7 +1,8 @@
-# qt-json-rs
+# qt-json
 
 
 [![codecov](https://codecov.io/gh/TheDome/qt-json-rs/branch/develop/graph/badge.svg?token=7MIOMJ88B1)](https://codecov.io/gh/TheDome/qt-json-rs)
+![crates.io](https://img.shields.io/crates/v/qt-json.svg)
 
 A simple parser for the Internal Qt Binary JSON data format.
 
@@ -15,7 +16,7 @@ Simply provide a binary encoded JSON Array to the function and it will parse it 
 internal JSON structure:
 
 ```rust
-use qt_json_rs::QJSONDocument;
+use qt_json::QJSONDocument;
 
 fn main(){
         let json_data = b"qbjs\
@@ -37,3 +38,5 @@ This library has been created by looking at the Qt source code and performing re
 engineering.
 There is a possibility that the code will not work with other Version of Qt JSON documents.
 Any help with this library is welcome.
+
+License: BSD
