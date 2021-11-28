@@ -39,4 +39,4 @@ engineering.
 There is a possibility that the code will not work with other Version of Qt JSON documents.
 Any help with this library is welcome.
 
-License: BSD
+License: BSD-3-Clause
