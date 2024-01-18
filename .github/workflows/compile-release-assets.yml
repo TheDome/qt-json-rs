@@ -19,7 +19,7 @@ jobs:
           crate: toml-cli
           version: 0.2.0
           use-tool-cache: true
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
